@@ -1,3 +1,6 @@
 Various scripts
 
 monitoring : monitoring related scripts
+  * check_mc-puppetd : checks puppet freshness
+  * check_mongo : check health of mongoDB
+  * check_stomp : check heath of a stomp server
