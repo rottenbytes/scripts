@@ -44,15 +44,15 @@ def rnd_string(length=8)
     rslt
 end
 
-producer = Stomp::Client.new(login, password, server, port, true)
+producer = Stomp::Connection.new(login, password, server, port, true, :timeout => 5)
 message = rnd_string(50)
 producer.publish queue,message, { :persistent => false }
-producer.close
+producer.disconnect
 
-consumer = Stomp::Connection.open(login, password, server, port, true)
+consumer = Stomp::Connection.open(login, password, server, port, true, :timeout => 5)
 consumer.subscribe(queue)
 message_test=consumer.receive.body.chomp
-
+consumer.disconnect
 
 
 if message == message_test 
