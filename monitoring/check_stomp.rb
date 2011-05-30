@@ -10,6 +10,7 @@ opts = GetoptLong.new(
     [ '--password', '-p', GetoptLong::REQUIRED_ARGUMENT],
     [ '--port', '-P', GetoptLong::REQUIRED_ARGUMENT],
     [ '--queue', '-q', GetoptLong::REQUIRED_ARGUMENT],
+    [ '--queue-suffix', '-s', GetoptLong::NO_ARGUMENT],
     [ '--debug', '-d', GetoptLong::NO_ARGUMENT],
     [ '--help', '-h', GetoptLong::NO_ARGUMENT]
 )
@@ -28,27 +29,30 @@ opts.each do |opt, arg|
             puts <<-EOF
     check_stomp.rb [OPTIONS/PARAMS]
 
-    -h, --help:
-       show help
+	    -h, --help:
+	       show help
 
-    --login x, -l x:
-       sets login for stomp connection
+	    --login x, -l x
+	       => sets login for stomp connection
 
-    --password y, -p y:
-       sets password for stomp connection
+	    --password y, -p y
+	       => sets password for stomp connection
 
-    --port 6163, -P 6163:
-       sets remote port for stomp connection
+	    --port 6163, -P 6163
+	       => sets remote port for stomp connection
 
-    --queue z, -q z:
-       sets queue name for stomp connection
+	    --queue z, -q z
+	       => sets queue name for stomp connection
 
-    --host host.domain.tld, -H host.domain.tld:
-       sets remote host for stomp connection
+	    --queue-suffix z, -s 
+	       => append _hostname to queue name 
 
-    --debug, -d:
-       enables debug mode for stomp probe
-    
+	    --host host.domain.tld, -H host.domain.tld
+	       => sets remote host for stomp connection
+
+	    --debug, -d
+	       => enables debug mode for stomp probe
+
           EOF
         exit
         when '--host'
@@ -61,6 +65,8 @@ opts.each do |opt, arg|
             port = arg.to_i
         when '--queue'
             queue = arg
+	when '--queue-suffix'
+	    queue = queue+"_"+server
         when '--debug'
             debugmode = true
     end
@@ -78,7 +84,7 @@ end
 puts "Connecting to stomp server" if debugmode
 producer = Stomp::Connection.new(login, password, server, port, true, :timeout => 5)
 message = rnd_string(50)
-puts "Sending stomp message to nagios queue" if debugmode
+puts "Sending stomp message to queue:" + queue if debugmode
 producer.send(queue,message)
 puts "Message sent: "+message if debugmode
 producer.disconnect
@@ -87,7 +93,7 @@ puts "Disconnecting from stomp server" if debugmode
 puts "Re-connecting to stomp server" if debugmode
 consumer = Stomp::Connection.open(login, password, server, port, true, :timeout =>5)
 
-puts "Subscribing to nagios queue" if debugmode
+puts "Subscribing to queue:" + queue if debugmode
 message_test = ""
 consumer.subscribe(queue) 
 print "Receiving nagios queue messages" if debugmode
